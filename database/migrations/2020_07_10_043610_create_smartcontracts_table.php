@@ -15,7 +15,7 @@ class CreateSmartcontractsTable extends Migration
     {
         Schema::create('smartcontracts', function (Blueprint $table) {
             $table->id();
-            $table->integer('userid');
+            $table->unsignedBigInteger('userid');
             $table->text('filename');
             $table->text('code');
             $table->foreign('userid')->references('id')->on('users');
