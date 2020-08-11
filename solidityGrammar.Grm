@@ -1,0 +1,696 @@
+
+% TXL Solidity Grammar
+% Solidity Lexical Conventions
+
+comments
+    //
+    /*  */
+end comments
+
+compounds
+    !=  %=  &&  &=  *=  ++  +=  -+  --  -=  
+    ->  ->*  .*  /=  ::  <<  <<=  <=   */
+    ==  >=  >>  >>=  ^=  |=  ||  **
+end compounds
+
+tokens
+	Identifier		 			 "[$\u][$\i]*"
+	HexNumber					 "0[xX][0123456789abcdefABCDEF]+" 
+end tokens
+
+keys 
+  'abstract 'after 'case 'catch 'default' 'final 'in 'inline 'let 'match 'null 'of 'relocatable 'static 'switch 'try 'typeof
+  'view 'type 'pure 'public 'private 'payable 'address 'anonymous 'internal 'external 'indexed 'continue 'constant 'break 
+  'contract 'library 'interface
+end keys
+
+
+define program
+	[repeat sourceUnit]
+end define 
+
+define sourceUnit
+	[repeat pragmaDirective] [NL]
+  | [repeat importDirective] [NL]
+  | [repeat contractDefinition+] [NL]
+  | [repeat statement] 
+end define
+
+define pragmaDirective
+	'pragma [pragmaName] [pragmaValue] '; 	[NL][NL]
+end define
+
+define pragmaName
+   [identifier] 
+end define 
+
+define pragmaValue
+		[version]
+	| [expression] 
+end define
+
+define version
+	[versionConstraint] [repeat versionConstraint] 
+end define
+
+define versionConstraint
+	[opt versionOperator] [VersionLiteral]
+end define
+
+define versionOperator
+		'^
+	| '~
+	| '>=
+	| '>
+	| '<
+	| '<=
+	| '= 
+end define  
+
+define importDeclaration
+	[identifier] 'as [opt identifier] 
+end define 
+
+define importDirective
+	'import [stringlit] [opt asIdentifier] ';							[NL]
+  | 'import '* [opt asIdentifier] 'from [stringlit] ';					[NL]
+  | 'import [identifier] [opt asIdentifier] 'from [stringlit] ';		[NL]
+  | 'import '{ [repeat importDeclaration]'} 'from [stringlit] '; 		[NL]
+end define 
+
+define asIdentifier
+	'as [identifier]
+end define
+ 
+define contractDefinition
+	[contractKey] [identifier] [opt isInheritance] [NL] '{ [NL][IN] [repeat contractPart] [NL] '}
+end define 
+
+define contractKey 
+	'contract
+	| 'interface
+	| 'library
+end define
+
+define isInheritance
+	'is [list inheritanceSpecifier]
+end define
+
+define inheritanceSpecifier
+   [userDefinedTypeName] [opt expressionListSpec]
+end define 
+
+define expressionListSpec
+'( [opt expressionList] ')
+end define
+
+define contractPart
+    [repeat statement]
+end define
+
+define stateVariableDeclaration
+	[typeName] [repeat accessSpecifier] [identifier] [opt variableDefinition] ';
+end define 
+
+define variableDefinition
+	'= [expression]
+end define
+
+define accessSpecifier
+		[PublicKeyword]
+	| [InternalKeyword]
+	| [PrivateKeyword]
+	| [ConstantKeyword]
+end define
+
+define usingForDeclaration
+	'using [identifier] 'for '* 				
+   | 'using [identifier] 'for [typeName] '; 	
+end define 
+
+define structDefinition
+   'struct [identifier] '{ [IN] [NL] [repeat variableDeclarationSpec] [NL] [EX]'}
+end define 
+
+define variableDeclarationSpec
+	[variableDeclaration] ';
+end define
+
+define constructorDefinition
+   'constructor [parameterList] [modifierList] [IN] [block] [EX]
+end define 
+
+define modifierDefinition
+   'modifier [identifier] [opt parameterList] [IN] [block] [EX]
+end define 
+
+define modifierInvocation
+  [identifier] [opt expressionListSpec] 
+end define
+
+define functionDefinition
+    'function [opt identifier] [parameterList] [modifierList] [opt returnParameters] '; [NL]
+	| 'function [opt identifier] [parameterList] [modifierList] [opt returnParameters] [IN] [block] [EX]
+end define
+
+define returnParameters
+  'returns [parameterList] 
+end define
+
+define modifierList
+  [repeat modifierListSpec] 
+end define 
+
+define modifierListSpec
+		[modifierInvocation]
+	| [stateMutability]
+	| [ExternalKeyword]
+    | [PublicKeyword]
+	| [InternalKeyword]
+	| [PrivateKeyword] 
+end define
+
+define eventDefinition
+  'event [identifier] [eventParameterList] [opt AnonymousKeyword] '; 
+end define
+
+define enumValue
+  [identifier] 
+end define 
+
+define enumDefinition
+   'enum [identifier] '{ [list enumValue]'} 
+end define
+
+define parameterList
+  '( [list parameter] ') 
+end define
+
+define parameter
+   [repeat typeName] [modifierList] [opt storageLocation] [opt identifier] 
+end define
+
+define eventParameterList
+   '( [list eventParameter] ') 
+end define
+
+define eventParameter
+  [repeat typeName] [modifierList] [opt IndexedKeyword] [opt identifier] 
+end define
+
+define functionTypeParameterList
+   '( [list functionTypeParameter] ') 
+end define
+
+define functionTypeParameter
+  [repeat typeName] [modifierList] [opt storageLocation] 
+end define
+
+define variableDeclaration
+  [repeat typeName] [modifierList] [opt storageLocation] [identifier] 
+end define
+
+define typeName
+	[elementaryTypeName]
+  | [userDefinedTypeName]
+  | [mapping]
+  | [typeName] '[ [opt expression] ']
+  | [functionTypeName]
+  | 'address
+  | 'payable 
+end define
+
+define userDefinedTypeName
+  [identifier] [repeat dotAccess]
+end define
+
+define dotAccess
+	'. [identifier]
+end define
+
+define mapping
+   'mapping '( [elementaryTypeName] '=> [repeat typeName] ')
+end define
+
+define functionTypeName
+   'function [functionTypeParameterList] [repeat functionAccessSpec] [opt functionReturns]
+end define
+
+define functionReturns
+	'returns[opt functionTypeParameterList]
+end define
+
+define functionAccessSpec
+	[InternalKeyword]
+ | [ExternalKeyword]
+ | [stateMutability]
+end define
+
+define storageLocation
+	'memory
+	| 'storage
+	| 'calldata
+end define
+
+define stateMutability
+		[PureKeyword]
+	| [ConstantKeyword]
+	| [ViewKeyword]
+	| [PayableKeyword] 
+end define
+
+define block
+  '{ [IN] [NL] [repeat statement] [NL] [EX]'}
+end define
+
+define statement
+	[boolStatement]								
+  |	[stateVariableDeclaration]		
+  | [usingForDeclaration]			
+  | [structDefinition]				
+  | [constructorDefinition]			
+  | [modifierDefinition]			
+  | [functionDefinition]			
+  | [eventDefinition]				
+  | [enumDefinition] 				
+  | [ifStatement]					
+  | [whileStatement]				
+  | [forStatement]					
+  | [block]								
+  | [inlineAssemblyStatement]		
+  | [doWhileStatement]				
+  | [continueStatement]				
+  | [breakStatement]				
+  | [returnStatement]				
+  | [throwStatement]				
+  | [emitStatement]	
+  | [simpleStatement]   
+end define
+
+define boolStatement 
+	'('bool ', ') '= [functionCallArguments] ';
+end define 
+
+define ifStatement
+  'if '( [expression] ') [statement] [opt elseStatement]
+end define
+
+define elseStatement
+	'else [statement]
+end define
+
+define whileStatement
+	'while '( [expression] ') [statement] 
+end define
+
+define simpleStatement
+		[variableDeclarationStatement]
+	| [expressionStatement] 
+end define
+
+define expressionStatement
+  [expression] '; [NL]
+end define
+
+define forStatement
+	'for '( [forInit] [forExpression] [expression] ') [statement] 
+end define
+
+define forInit
+	[simpleStatement]
+	| ';
+end define 
+
+define forExpression
+	[expressionStatement]
+	| '; 
+end define
+
+define inlineAssemblyStatement
+	'assembly [opt stringlit] [assemblyBlock] 
+end define
+
+define doWhileStatement
+	'do [statement]  'while '( [expression] ') ';
+end define
+
+define continueStatement
+  'continue ';	
+end define
+
+define breakStatement
+  'break ';	
+end define
+
+define returnStatement
+  'return [opt expression] ';
+end define
+
+define throwStatement
+	'throw ';
+end define
+
+define emitStatement
+	'emit [functionCall] '; 
+ end define
+
+define variableDeclarationStatement
+	[varStatementStart] [opt variableDefinition] ';
+end define
+
+define varStatementStart
+		'var [identifierList]
+	| [variableDeclaration]
+	| '( [variableDeclarationList] ') 
+end define
+
+define variableDeclarationList
+   [list variableDeclaration]
+end define
+
+define identifierList
+  '( [list identifier] ')
+end define
+
+define elementaryTypeName
+	'address
+   | 'bool
+   | 'string
+   | 'var
+   | [Int]
+   | [Uint]
+   | 'byte
+   | [Byte]
+   | [Fixed]
+   | [Ufixed] 
+end define
+
+define Int
+  'int | 'int8 | 'int16 | 'int24 | 'int32 | 'int40 | 'int48 | 'int56 | 'int64 | 'int72 | 'int80 | 'int88 | 'int96 
+  | 'int104 | 'int112 | 'int120 | 'int128 | 'int136 | 'int144 | 'int152 | 'int160 | 'int168 | 'int176 | 'int184 | 'int192 
+  | 'int200 | 'int208 | 'int216 | 'int224 | 'int232 | 'int240 | 'int248 | 'int256 
+end define
+
+define Uint
+  : 'uint | 'uint8 | 'uint16 | 'uint24 | 'uint32 | 'uint40 | 'uint48 | 'uint56 | 'uint64 | 'uint72 | 'uint80 
+  | 'uint88 | 'uint96 | 'uint104 | 'uint112 | 'uint120 | 'uint128 | 'uint136 | 'uint144 | 'uint152 | 'uint160 
+  | 'uint168 | 'uint176 | 'uint184 | 'uint192 | 'uint200 | 'uint208 | 'uint216 | 'uint224 | 'uint232 | 'uint240 
+  | 'uint248 | 'uint256 
+end define 
+
+define Byte
+  : 'bytes | 'bytes1 | 'bytes2 | 'bytes3 | 'bytes4 | 'bytes5 | 'bytes6 | 'bytes7 | 'bytes8 | 'bytes9 | 'bytes10 
+  | 'bytes11 | 'bytes12 | 'bytes13 | 'bytes14 | 'bytes15 | 'bytes16 | 'bytes17 | 'bytes18 | 'bytes19 | 'bytes20 
+  | 'bytes21 | 'bytes22 | 'bytes23 | 'bytes24 | 'bytes25 | 'bytes26 | 'bytes27 | 'bytes28 | 'bytes29 | 'bytes30 
+  | 'bytes31 | 'bytes32 
+end define
+
+define Fixed
+  'fixed 
+  | 'fixed [repeat number+] 'x [repeat number+] 
+end define 
+
+define Ufixed
+	'ufixed
+  | 'ufixed [repeat number+] 'x [repeat number+] 
+end define
+
+define expression
+    [expression] '++
+  | [expression] '--
+  | 'new [typeName]
+  | [expression] '[ [expression] ']
+  | [expression] '( [functionCallArguments] ') 
+  | [expression] '. [identifier]
+  | '( [expression] ')
+  | '++ [expression]
+  | '-- [expression]
+  | '+ [expression]
+  | '- [expression]
+  | 'after [expression]
+  | 'delete [expression]
+  | '! [expression]
+  | '~ [expression]
+  | [expression] '< [expression]
+  | [expression] '> [expression]
+  | [expression] '<= [expression]
+  | [expression] '>= [expression]
+  | [expression] '== [expression]
+  | [expression] '!=  [expression]
+  | [expression] '&& [expression]
+  | [expression] '|| [expression]
+  | [expression] '? [expression] ': [expression]
+  | [expression] '= [expression]
+  | [expression] '|= [expression]
+  | [expression] '^= [expression]
+  | [expression] '&= [expression]
+  | [expression] '<<= [expression]
+  | [expression] '>>= [expression]
+  | [expression] '+= [expression]
+  | [expression] '-= [expression]
+  | [expression] '*= [expression]
+  | [expression] '*/ [expression]
+  | [expression] '/= [expression]
+  | [expression] '%= [expression]
+  | [expression] '/ [expression]
+  | [expression] '% [expression]
+  | [expression] '+ [expression]
+  | [expression] '- [expression]
+  | [expression] '<< [expression]
+  | [expression] '>> [expression]
+  | [expression] '& [expression]
+  | [expression] '^ [expression]
+  | [expression] '| [expression]
+  | [expression] '* [expression]
+  | [expression] '** [expression]
+  | [primaryExpression] 
+end define
+
+define primaryExpression
+	[BooleanLiteral]
+  
+  | [numberLiteral]
+  | [HexNumber]
+  | [stringlit]
+  | [identifier] [opt squareBrackets]
+  | [TypeKeyword]
+  | [tupleExpression]
+  | [elementaryTypeNameExpression] [opt squareBrackets] 
+end define
+
+define squareBrackets
+ '[ ']
+ end define
+
+define expressionList
+  [list expression]
+end define
+
+define nameValueList
+  [list nameValue] 
+end define
+
+define nameValue
+   [identifier] ': [expression] 
+end define
+
+define functionCallArguments
+   '{ [opt nameValueList] '}
+  | [opt expressionList] 
+end define
+
+define functionCall
+  [expression] '( [functionCallArguments] ') 
+end define
+
+define assemblyBlock
+   '{ [repeat assemblyItem] '} 
+end define
+
+define assemblyItem
+    [identifier]
+  | [assemblyBlock]
+  | [assemblyExpression]
+  | [assemblyLocalDefinition]
+  | [assemblyAssignment]
+  | [assemblyStackAssignment]
+  | [labelDefinition]
+  | [assemblySwitch]
+  | [assemblyFunctionDefinition]
+  | [assemblyFor]
+  | [assemblyIf]
+  | [BreakKeyword]
+  | [ContinueKeyword]
+  | [subAssembly]
+  | [numberLiteral]
+  | [stringlit]
+  | [HexNumber] 
+end define
+
+define assemblyExpression
+	[assemblyCall]
+  | [assemblyLiteral] 
+end define
+
+define assemblyCall
+	[assemblyCallStart] [opt assemblyListSpec]
+end define
+
+define assemblyCallStart
+		'return
+	| 'address
+	| 'byte
+	| [identifier]
+end define 
+
+define assemblyListSpec
+	'( [list assemblyExpression] ') 
+end define
+
+define assemblyLocalDefinition
+	'let [assemblyIdentifierOrList] [opt assemblyExpressionSpec]
+end define
+
+define assemblyExpressionSpec
+	':= [assemblyExpression]
+end define
+
+define assemblyAssignment
+  [assemblyIdentifierOrList] [assemblyExpressionSpec]
+end define
+
+define assemblyIdentifierOrList
+	[identifier] 
+  | '( [assemblyIdentifierList] ') 
+end define
+ 
+define assemblyIdentifierList
+   [list identifier]
+end define
+
+define assemblyStackAssignment
+	'=: [identifier] 
+end define
+
+define labelDefinition
+	[identifier] ': 
+end define
+
+define assemblySwitch
+  'switch [assemblyExpression] [NL] [repeat assemblyCase] [NL]
+end define
+
+define assemblyCase
+	'case [assemblyLiteral] [NL] [assemblyBlock]
+  | 'default [assemblyBlock] 
+end define
+
+define assemblyFunctionDefinition
+	'function [identifier] '( [opt assemblyIdentifierList] ')
+    [opt assemblyFunctionReturns] [NL] [assemblyBlock] 
+end define
+
+define assemblyFunctionReturns
+  '-> [assemblyIdentifierList]
+end define
+
+define assemblyFor
+	'for [assemblyBlockOrExpression] [assemblyExpression] [assemblyBlockOrExpression] [NL] [assemblyBlock] 
+end define
+
+define assemblyBlockOrExpression 
+	[assemblyBlock]
+	| [assemblyExpression]
+end define
+
+define assemblyIf
+  'if [assemblyExpression] [NL] [assemblyBlock] 
+end define
+ 
+define assemblyLiteral
+	[stringlit]
+	| [HexNumber] 
+	|[numberLiteral]
+end define
+
+define subAssembly
+  'assembly [identifier] [assemblyBlock] 
+end define
+
+define tupleExpression
+	'( [list expression] ')
+  | '[ [list expression] '] 
+end define
+
+define elementaryTypeNameExpression
+	[repeat elementaryTypeName] 
+end define
+
+define numberLiteral
+	[number] [opt NumberUnit]
+  | [HexNumber] [opt NumberUnit] 
+end define
+
+define identifier
+	'from
+	| 'calldata
+	| [Identifier] 
+end define
+
+define VersionLiteral
+  [number] [repeat dotNumber]
+end define 
+
+define dotNumber
+ '. [number]
+ end define
+
+define BooleanLiteral
+  'true
+  | 'false
+end define
+
+define NumberUnit
+  'wei | 'szabo | 'finney | 'ether | 'seconds | 'minutes | 'hours | 'days | 'weeks | 'years 
+end define
+
+
+define AnonymousKeyword 
+	'anonymous 
+end define 
+define BreakKeyword 
+	'break 
+end define
+define ConstantKeyword 
+	'constant
+end define
+define ContinueKeyword 
+	'continue
+end define
+define ExternalKeyword 
+	'external
+end define
+define IndexedKeyword 
+	'indexed
+end define
+define InternalKeyword 
+	'internal
+end define
+define PayableKeyword 	
+	'payable
+end define
+define PrivateKeyword 
+	'private
+end define
+define PublicKeyword 
+	'public
+end define
+define PureKeyword 
+	'pure
+end define
+define TypeKeyword 	
+	'type
+end define
+define ViewKeyword 
+	'view
+end define
