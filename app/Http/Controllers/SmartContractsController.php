@@ -56,7 +56,7 @@ class SmartContractsController extends Controller
             $process->run();
 
         if (!$process->isSuccessful()) {
-            $processError = $process->getErrorOutput();
+            $processError = $process->getIncrementalErrorOutput();
             return view('scancontract', ['processError' => $processError, 'filename' => $filename, 'sourcecode' =>$sourcecode]);
         }
         /*echo $process->getOutput();
