@@ -55,10 +55,10 @@ return [
             'visibility' => 'public',
         ],
         'txl'=> [
-            'driver' => 'local',
+            'driver' => 'public',
             'url' => env('APP_URL'),
             /*'url' => env('APP_URL').'/storage',*/
-            'root' => base_path(),
+            'root' => public_path(),
             'visibility' => 'public',
         ],
 

@@ -46,8 +46,6 @@ class SmartContractsController extends Controller
 
     public function store(Request $request)
     {
-        $exitCode = Artisan::call('storage:link', [] );
-        echo $exitCode; // 0 exit code for no errors.
         $filename = $request->get('filename');
         $sourcecode = $request->get('sourcecode');
         Storage::disk('txl')->put('SCUT.sol', $sourcecode);
