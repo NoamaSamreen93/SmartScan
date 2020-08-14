@@ -53,7 +53,7 @@ class SmartContractsController extends Controller
         $currentuserid = Auth::user()->getAuthIdentifier();
         /*$txl =  Storage::disk('txl')->get('DOSTXL2.exe');
         $scut = Storage::disk('txl')->get('SCUT.sol');*/
-        $process = new Process(['/app/public/txlexec.exe', '-v' , 'SCUT.sol']);
+        $process = new Process(['/app/txlexec.exe', '-v' , 'SCUT.sol']);
             $process->run();
 
         if (!$process->isSuccessful()) {
