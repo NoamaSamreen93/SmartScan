@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="c426abc1-6a4c-4323-b5cb-9bd1a78fecbc" name="cs.ryerson.ca/~nfsamree" url="cs.ryerson.ca/~nfsamree">
+        <fileTransfer host="moon.scs.ryerson.ca" port="22" rootFolder="/class-cs_masters/nfsamree" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

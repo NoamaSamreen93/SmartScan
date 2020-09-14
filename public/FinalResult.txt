@@ -1,4 +1,1 @@
-Scanned Contract: Context    
-Scanned Contract: ERC20    
-Scanned Contract: ERC20Detailed    
-Scanned Contract: Bless    
+Scanned Contract: Attacker_BetDeEx    
